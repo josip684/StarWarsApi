@@ -1,2 +1,2 @@
 # StarWarsApi
-Work with "https://swapi.co/" API.
+Work with "https://swapi.co/" API in React.js.
