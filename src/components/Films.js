@@ -1,45 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 
-function Films() {
-    useEffect(() => {
-        fetchItems();
-    }, []);
+class Films extends Component {
+    constructor(){
+        super()
+        this.state = {
+            items: [],
+            isLoading: true,
+            error: null,
+        }
+    }
+    
+   componentDidMount(){
+       this.fetchItems();
+   }
 
-    const [items, setItems] = useState([]);
+    fetchItems = async () => {
+        fetch('https://swapi.co/api/films')
+            .then(response => response.json())
+            .then(data => 
+                this.setState({
+                    items: data.results,
+                    isLoading: false
+                }))
+                .catch(error => this.setState({ error, isLoading: false}));
+    }
 
-    const fetchItems = async () => {
-        const data = await fetch(
-            'https://swapi.co/api/films'
+    render(){
+        const { isLoading, items, error } = this.state;
+        console.log(this.state.items)
+        return (
+            <div>
+                <hr />
+                <h1 style={{ color: "white" }}>F I L M S</h1>
+                <hr />
+                <div>
+                    {error ? <p>{error.message}</p> : null}
+                    {!isLoading ? (
+                        items.map(item => {
+                        const { director, title, episode_id, opening_crawl, producer, release_date } = item;
+                        return (
+                            <div key={title}>
+                                <h1 style={styles.item}>Title: {title}</h1>
+                                <p style={styles.item}>Director: {director}</p>
+                                <p style={styles.item}>Episode id: {episode_id}</p>
+
+                                <p style={styles.item}>Opening crawl: {opening_crawl}</p>
+                                <p style={styles.item}>Producer: {producer}</p>
+                                <p style={styles.item}>Release date: {release_date}</p>
+
+                                <hr />
+                            </div>
+                        );
+                        })
+                    ) : (
+                            <h1 style={styles.title} >Loading ...</h1>
+                        )	
+                    }
+			    </div>
+            </div>
         );
-        const items = await data.json();
-        console.log(items.results)
-        setItems(items.results);
-    };
-
-    return (
-        <div style={styles.container}>
-            <hr />
-            <h1 style={{ color: "white" }}>F I L M S</h1>
-            <hr />
-            <ul>
-                {
-                    items.map((item, index) => (
-                        <ul key={index} style={styles.ul}>
-                            <li style={styles.title} key={item.title}><b>{item.title}</b></li>
-                            <li style={styles.item} key={item.director}>Director: {item.director}</li>
-                            <li style={styles.item} key={item.producer}>Producer: {item.producer}</li>
-                            <li style={styles.item} key={item.episode_id}>Episode: {item.episode_id}</li>
-                            <li style={styles.item} key={item.release_date}>Release date: {item.release_date}</li>
-                            <li style={styles.item} key={item.opening_crawl}>Opening crawl: {item.opening_crawl}</li>
-                            <li style={styles.item} key={item.created}>Created: {item.created}</li>
-                            <hr />
-                        </ul>
-                    ))
-                }
-            </ul>
-
-        </div>
-    );
+    }
 }
 
 const styles = {
@@ -60,5 +80,4 @@ const styles = {
         fontSize: 50
     }
 }
-
 export default Films;

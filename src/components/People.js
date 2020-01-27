@@ -1,47 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 
+class People extends Component {
+    constructor(){
+        super()
+        this.state = {
+            items: [],
+            isLoading: true,
+            error: null,
+        }
+    }
+    
+   componentDidMount(){
+       this.fetchItems();
+   }
 
-function People() {
-    useEffect(() => {
-        fetchItems();
-    }, []);
+    fetchItems = async () => {
+        fetch('https://swapi.co/api/people')
+            .then(response => response.json())
+            .then(data => 
+                this.setState({
+                    items: data.results,
+                    isLoading: false
+                }))
+                .catch(error => this.setState({ error, isLoading: false}));
+    }
 
-    const [items, setItems] = useState([]);
+    render(){
+        const { isLoading, items, error } = this.state;
+        console.log(this.state.items)
+        return (
+            <div>
+                <hr />
+                <h1 style={{ color: "white" }}>P E O P L E</h1>
+                <hr />
+                <div>
+                    {error ? <p>{error.message}</p> : null}
+                    {!isLoading ? (
+                        items.map(item => {
+                        const { birth_year, name, eye_color, gender, hair_color, height, 
+                            mass, skin_color } = item;
+                        return (
+                            <div key={name}>
+                                <h1 style={styles.item}>Name: {name}</h1>
+                                <p style={styles.item}>Model: {birth_year}</p>
+                                <p style={styles.item}>Eye color: {eye_color}</p>
 
-    const fetchItems = async () => {
-        const data = await fetch(
-            'https://swapi.co/api/people'
+                                <p style={styles.item}>Gender: {gender}</p>
+                                <p style={styles.item}>Hair color: {hair_color}</p>
+                                <p style={styles.item}>Height: {height}cm</p>
+
+                                <p style={styles.item}>Mass: {mass}kg</p>
+                                <p style={styles.item}>Skin color: {skin_color}</p>
+                                <hr />
+                            </div>
+                        );
+                        })
+                    ) : (
+                            <h1 style={styles.title} >Loading ...</h1>
+                        )	
+                    }
+			    </div>
+            </div>
         );
-        const items = await data.json();
-        console.log(items.results)
-        setItems(items.results)
-
-    };
-
-    return (
-        <div style={styles.container}>
-            <hr />
-            <h1 style={{ color: "white" }}>P E O P L E</h1>
-            <hr />
-            <ul>
-                {
-                    items.map((item, index) => (
-                        <ul key={index} style={styles.ul}>
-                            <li style={styles.title} key={item.name}><b>{item.name}</b></li>
-                            <li style={styles.item} key={item.birth_year}>Birth year: {item.birth_year}</li>
-                            <li style={styles.item} key={item.eye_color}>Eye color: {item.eye_color}</li>
-                            <li style={styles.item} key={item.gender}>Gender: {item.gender}</li>
-                            <li style={styles.item} key={item.hair_color}>Hair color: {item.hair_color}</li>
-                            <li style={styles.item} key={item.mass}>Mass: {item.mass}</li>
-                            <li style={styles.item} key={item.created}>Created: {item.created}</li>
-                            <hr />
-                        </ul>
-                    ))
-                }
-            </ul>
-
-        </div>
-    );
+    }
 }
 
 const styles = {
@@ -62,5 +83,4 @@ const styles = {
         fontSize: 50
     }
 }
-
 export default People;

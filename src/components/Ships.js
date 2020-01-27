@@ -1,51 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 
-function Ships() {
-    useEffect(() => {
-        fetchItems();
-    }, []);
+class Ships extends Component {
+    constructor(){
+        super()
+        this.state = {
+            items: [],
+            isLoading: true,
+            error: null,
+        }
+    }
+    
+   componentDidMount(){
+       this.fetchItems();
+   }
 
-    const [items, setItems] = useState([]);
+    fetchItems = async () => {
+        fetch('https://swapi.co/api/starships')
+            .then(response => response.json())
+            .then(data => 
+                this.setState({
+                    items: data.results,
+                    isLoading: false
+                }))
+                .catch(error => this.setState({ error, isLoading: false}));
+    }
 
-    const fetchItems = async () => {
-        const data = await fetch(
-            'https://swapi.co/api/starships'
+    render(){
+        const { isLoading, items, error } = this.state;
+        console.log(this.state.items)
+        return (
+            <div>
+                <hr />
+                <h1 style={{ color: "white" }}>S H I P S</h1>
+                <hr />
+                <div>
+                    {error ? <p>{error.message}</p> : null}
+                    {!isLoading ? (
+                        items.map(item => {
+                        const { model, name, manufacturer, starship_class, cost_in_credits, length, 
+                            crew, passengers, max_atmosphering_speed, hyperdrive_rating, MGLT, cargo_capacity, films } = item;
+                        return (
+                            <div key={model}>
+                                <h1 style={styles.item}>Name: {name}</h1>
+                                <p style={styles.item}>Model: {model}</p>
+                                <p style={styles.item}>Manufacturer: {manufacturer}</p>
+
+                                <p style={styles.item}>Starship class: {starship_class}</p>
+                                <p style={styles.item}>Cost in credits: {cost_in_credits}</p>
+                                <p style={styles.item}>Length: {length}</p>
+
+                                <p style={styles.item}>Crew: {crew}</p>
+                                <p style={styles.item}>Passengers: {passengers}</p>
+                                <p style={styles.item}>Max atmosphering speed: {max_atmosphering_speed}</p>
+
+                                <p style={styles.item}>Hyperdrive rating: {hyperdrive_rating}</p>
+                                <p style={styles.item}>MGLT: {MGLT}</p>
+                                <p style={styles.item}>Cargo capacity: {cargo_capacity}</p>
+                                
+                                <p style={styles.item}>Film 1: {films[0]}</p>
+                                <hr />
+                            </div>
+                        );
+                        })
+                    ) : (
+                            <h1 style={styles.title} >Loading ...</h1>
+                        )	
+                    }
+			    </div>
+            </div>
         );
-        const items = await data.json();
-        console.log(items.results)
-        setItems(items.results)
-    };
-
-    return (
-        <div>
-            <hr />
-            <h1 style={{ color: "white" }}>S H I P S</h1>
-            <hr />
-            <ul>
-                {
-                    items.map((item, index) => (
-                        <ul key={index} style={styles.ul}>
-                            <li style={styles.title} key={item.name}><b>{item.name}</b></li>
-                            <li style={styles.item} key={item.model}>Model: {item.model}</li>
-                            <li style={styles.item} key={item.starship_class}>Starship class: {item.starship_class}</li>
-                            <li style={styles.item} key={item.manufacturer}>Manufacturer: {item.manufacturer}</li>
-                            <li style={styles.item} key={item.cost_in_credits}>Cost in credits: {item.cost_in_credits}</li>
-                            <li style={styles.item} key={item.length}>Length: {item.length}m</li>
-                            <li style={styles.item} key={item.crew}>Crew: {item.crew}</li>
-                            <li style={styles.item} key={item.passengers}>Passengers: {item.passengers}</li>
-                            <li style={styles.item} key={item.max_atmosphering_speed}>Max atmosphering speed: {item.max_atmosphering_speed}</li>
-                            <li style={styles.item} key={item.hyperdrive_rating}>Hiperdrive rating: {item.hyperdrive_rating}</li>
-                            <li style={styles.item} key={item.MGLT}>MGLT: {item.MGLT}</li>
-                            <li style={styles.item} key={item.cargo_capacity}>Cargo capacity: {item.cargo_capacity}</li>
-                            <li style={styles.item} key={item.created}>Created: {item.created}</li>
-
-                            <hr />
-                        </ul>
-                    ))
-                }
-            </ul>
-        </div>
-    );
+    }
 }
 
 const styles = {

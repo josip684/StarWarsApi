@@ -1,46 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 
-function Planets() {
-    useEffect(() => {
-        fetchItems();
-    }, []);
+class Planets extends Component {
+    constructor(){
+        super()
+        this.state = {
+            items: [],
+            isLoading: true,
+            error: null,
+        }
+    }
+    
+   componentDidMount(){
+       this.fetchItems();
+   }
 
-    const [items, setItems] = useState([]);
+    fetchItems = async () => {
+        fetch('https://swapi.co/api/planets')
+            .then(response => response.json())
+            .then(data => 
+                this.setState({
+                    items: data.results,
+                    isLoading: false
+                }))
+                .catch(error => this.setState({ error, isLoading: false}));
+    }
 
-    const fetchItems = async () => {
-        const data = await fetch(
-            'https://swapi.co/api/planets'
+    render(){
+        const { isLoading, items, error } = this.state;
+        console.log(this.state.items)
+        return (
+            <div>
+                <hr />
+                <h1 style={{ color: "white" }}>P L A N E T S</h1>
+                <hr />
+                <div>
+                    {error ? <p>{error.message}</p> : null}
+                    {!isLoading ? (
+                        items.map(item => {
+                        const { climate, name, gravity, diameter, orbital_period, population, 
+                            rotation_period, surface_water, terrain } = item;
+                        return (
+                            <div key={name}>
+                                <h1 style={styles.item}>Name: {name}</h1>
+                                <p style={styles.item}>Climate: {climate}</p>
+                                <p style={styles.item}>Gravity: {gravity}</p>
+
+                                <p style={styles.item}>Diameter: {diameter}</p>
+                                <p style={styles.item}>Orbital period: {orbital_period}</p>
+                                <p style={styles.item}>Population: {population}</p>
+
+                                <p style={styles.item}>Rotation period: {rotation_period}</p>
+                                <p style={styles.item}>Surface water: {surface_water}</p>
+                                <p style={styles.item}>Terrain: {terrain}</p>
+                                <hr />
+                            </div>
+                        );
+                        })
+                    ) : (
+                            <h1 style={styles.title} >Loading ...</h1>
+                        )	
+                    }
+			    </div>
+            </div>
         );
-        const items = await data.json();
-        console.log(items.results);
-        setItems(items.results);
-
-    };
-    return (
-        <div style={{ justifyItems: "left" }}>
-            <hr />
-            <h1 style={{ color: "white" }}>P L A N E T S</h1>
-            <hr />
-            <ul>
-                {
-                    items.map((item, index) => (
-                        <ul key={index} style={styles.ul}>
-                            <li style={styles.title} key={item.name}><b>{item.name}</b></li>
-                            <li style={styles.item} key={item.diameter}>Diameter: {item.diameter}</li>
-                            <li style={styles.item} key={item.rotation_period}>Rotation period: {item.rotation_period}</li>
-                            <li style={styles.item} key={item.orbital_period}>Orbital period: {item.orbital_period}</li>
-                            <li style={styles.item} key={item.gravity}>Gravity: {item.gravity}</li>
-                            <li style={styles.item} key={item.climate}>Climate: {item.climate}</li>
-                            <li style={styles.item} key={item.terrain}>Terrain: {item.terrain}</li>
-                            <li style={styles.item} key={item.surface_water}>Surface water: {item.surface_water}</li>
-                            <li style={styles.item} key={item.created}>Created: {item.created}</li>
-                            <hr />
-                        </ul>
-                    ))
-                }
-            </ul>
-        </div>
-    )
+    }
 }
 
 const styles = {
@@ -61,5 +84,4 @@ const styles = {
         fontSize: 50
     }
 }
-
 export default Planets;
